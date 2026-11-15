@@ -1,0 +1,209 @@
+!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fraud Reports | Cyber Fraud Awareness Portal</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f3f6fb;
+    color: #24324a;
+}
+
+header {
+    background: #142d4e;
+    color: white;
+    padding: 24px;
+}
+
+header h1 {
+    margin: 0 0 8px;
+    font-size: 25px;
+}
+
+header p {
+    margin: 0;
+    color: #dbe7f5;
+}
+
+main {
+    max-width: 1150px;
+    margin: 30px auto;
+    padding: 0 18px;
+}
+
+.card {
+    background: white;
+    padding: 22px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px #142d4e12;
+}
+
+.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+button {
+    background: #1769aa;
+    color: white;
+    border: 0;
+    padding: 11px 17px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+button:hover {
+    background: #10558c;
+}
+
+#status {
+    color: #526176;
+    margin: 18px 0;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px;
+}
+
+th, td {
+    padding: 13px;
+    text-align: left;
+    border-bottom: 1px solid #e3e9f1;
+    overflow-wrap: anywhere;
+}
+
+th {
+    background: #eaf1fa;
+    color: #142d4e;
+}
+
+tr:hover td {
+    background: #f8faff;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    color: #68778c;
+    font-size: 13px;
+}
+</style>
+</head>
+
+<body>
+<header>
+    <h1>Cyber Fraud Awareness Portal</h1>
+    <p>Fraud Report Management</p>
+</header>
+
+<main>
+    <section class="card">
+        <div class="top">
+            <div>
+                <h2>Submitted Fraud Reports</h2>
+                <p>View reports submitted through the portal.</p>
+            </div>
+            <button onclick="loadReports()">Refresh Reports</button>
+        </div>
+
+        <p id="status">Loading reports...</p>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Fraud Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody id="reports"></tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<footer>
+    Cyber Fraud Awareness Portal | Project Demonstration
+</footer>
+
+<script>
+async function loadReports() {
+    const status = document.getElementById("status");
+    const tbody = document.getElementById("reports");
+
+    status.textContent = "Loading reports...";
+    tbody.replaceChildren();
+
+    try {
+        const response = await fetch("http://localhost:3000/api/reports");
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch reports");
+        }
+
+        const reports = await response.json();
+
+        if (!Array.isArray(reports)) {
+            throw new Error("Unexpected response");
+        }
+
+        if (reports.length === 0) {
+            status.textContent = "No reports have been submitted yet.";
+            return;
+        }
+
+        reports.forEach(report => {
+            const row = document.createElement("tr");
+
+            [
+                report.id,
+                report.name,
+                report.email,
+                report.fraud_type,
+                report.description
+            ].forEach(value => {
+                const cell = document.createElement("td");
+                cell.textContent = value ?? "";
+                row.appendChild(cell);
+            });
+
+            tbody.appendChild(row);
+        });
+
+        status.textContent = "Total reports: " + reports.length;
+    } catch (error) {
+        console.error(error);
+        status.textContent =
+            "Unable to load reports. Check the server and API route.";
+    }
+}
+
+loadReports();
+</script>
+</body>
+</html>
